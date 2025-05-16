@@ -1,29 +1,15 @@
-const express = require("express");
-const path = require("path");
-require("dotenv").config();
-
+const express = require('express');
 const app = express();
+const apiRoutes = require('./routes/api');
+const path = require('path');
 
-// Middleware para manejar datos JSON y formularios
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'Public')));
 
-// Servir archivos estáticos desde la carpeta 'public'
-app.use(express.static(path.join(__dirname, "Public")));
+app.use(express.json()); // para recibir JSON
+app.use(express.urlencoded({ extended: true })); // para recibir datos de formularios
 
-// Ruta principal para redirigir a index.html
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "Public", "index.html"));
+app.use('/api', apiRoutes);
+
+app.listen(3000, () => {
+  console.log('Servidor iniciado en puerto 3000');
 });
-
-// Rutas para API
-const apiRoutes = require("./routes/api");
-app.use("/api", apiRoutes);
-
-// Configuración del puerto
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando en puerto ${PORT}`);
-});
-
-

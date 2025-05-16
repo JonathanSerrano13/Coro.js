@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Inicio de Sesión</title>
-    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="./css/index.css">
 </head>
 
 <body>
@@ -17,10 +17,10 @@
 
     <div class="contenedor">
         <div class="logo">
-            <img src="/images/logo parroquia.png" alt="Logo">
+            <img src="./images/logo parroquia.png" alt="Logo">
         </div>
         <h1>Bienvenido</h1>
-        <form method="POST" action="/">
+        <form id="loginForm">
             <div class="fields">
                 <div class="field">
                     <label for="nombre">NOMBRE</label>
@@ -32,13 +32,13 @@
                 </div>
             </div>
             <div class="actions">
-                <button type="button" class="btn" onclick="window.location.href='Vistas/Registro.html'"">Registrar</button>
-                <button type="submit" class="btn" onclick="window.location.href='Vistas/Eventos.html'" >Iniciar sesión</button>
+                <button type="button" class="btn" onclick="window.location.href='/View/Registro.html'"">Registrar</button>
+                <button type="submit" class="btn" ><!--</button>onclick="window.location.href='Vistas/Eventos.html'" >-->Iniciar sesión</button>
             </div>
         </form>
     </div>
 
-    <script></script> 
+    <script src="./js/login.js"></script> 
 </body>
 
 </html>

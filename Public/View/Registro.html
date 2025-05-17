@@ -6,6 +6,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&display=swap" rel="stylesheet">
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Registro</title>
@@ -35,7 +39,13 @@
                 </div>
                 <div class="field">
                     <label for="password">CONTRASEÑA</label>
-                    <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña" required>
+                    <div style="position: relative;">
+                        <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña"
+                            required>
+                        <span id="togglePassword"
+                            style="position: absolute; top: 57%; right: 60px; transform: translateY(-50%); cursor: pointer; font-size: 30px;"><i
+                                class="fi fi-rs-eye"></i></span>
+                    </div>
                 </div>
                 <div class="field">
                     <label for="rol">ROL</label>
@@ -51,9 +61,25 @@
             </div>
         </form>
     </div>
-    
+
 
     <script src="../js/registro.js"></script>
+    <script>
+        // Alternar la visibilidad de la contraseña
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const passwordField = document.getElementById('password');
+            const isPasswordVisible = passwordField.type === 'password';
+            passwordField.type = isPasswordVisible ? 'text' : 'password';
+
+            const icon = this.querySelector('i');
+            if (isPasswordVisible) {
+                icon.className = "fi fi-rs-eye-slash";
+            } else {
+                icon.className = "fi fi-rr-eye-crossed"
+            }
+        });
+
+    </script>
 </body>
 
 </html>

@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         listaEventos.innerHTML = '<li>No hay eventos disponibles.</li>';
         return;
       }
-
+      
       // Renderizar eventos
       eventos.forEach(evento => {
         const li = document.createElement('li');

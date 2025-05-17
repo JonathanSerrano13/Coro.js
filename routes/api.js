@@ -56,6 +56,8 @@ router.post('/registro', (req, res) => {
   });
 });
 
+
+
 // Obtener lista de eventos (solo id y nombre)
 router.get('/eventos', (req, res) => {
   const query = 'SELECT ID, Nombre FROM evento ORDER BY FechaHora DESC';
@@ -65,45 +67,95 @@ router.get('/eventos', (req, res) => {
   });
 });
 
+
 // Borrar evento por ID
 router.delete('/eventos/:id', (req, res) => {
   const { id } = req.params;
-  const query = 'DELETE FROM evento WHERE ID = ?';
-  db.query(query, [id], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error al borrar evento' });
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Evento no encontrado' });
-    res.json({ message: 'Evento eliminado con éxito' });
+
+  // Borrar relaciones en visualizacion (canciones relacionadas)
+  const deleteVisualizacion = `
+    DELETE v FROM visualizacion v
+    INNER JOIN listaCanciones l ON v.ListaCancionesID = l.ID
+    WHERE l.EventoID = ?
+  `;
+
+  // Borrar lista de canciones asociada al evento
+  const deleteListaCanciones = 'DELETE FROM listaCanciones WHERE EventoID = ?';
+
+  // Borrar evento
+  const deleteEvento = 'DELETE FROM evento WHERE ID = ?';
+
+  db.query(deleteVisualizacion, [id], (err) => {
+    if (err) {
+      console.error('Error al borrar visualización:', err);
+      return res.status(500).json({ message: 'Error al borrar canciones relacionadas' });
+    }
+
+    db.query(deleteListaCanciones, [id], (err) => {
+      if (err) {
+        console.error('Error al borrar listaCanciones:', err);
+        return res.status(500).json({ message: 'Error al borrar lista de canciones' });
+      }
+
+      db.query(deleteEvento, [id], (err, result) => {
+        if (err) {
+          console.error('Error al borrar evento:', err);
+          return res.status(500).json({ message: 'Error al borrar evento' });
+        }
+        if (result.affectedRows === 0) return res.status(404).json({ message: 'Evento no encontrado' });
+        res.json({ message: 'Evento eliminado con éxito' });
+      });
+    });
   });
 });
 
 
 // Crear nuevo evento
 router.post('/eventos', (req, res) => {
-    const { Nombre, FechaHora, Ubicacion, Descripcion } = req.body;
+  const { Nombre, FechaHora, Ubicacion, Descripcion, Canciones } = req.body;
 
-    if (!Nombre || !FechaHora || !Ubicacion) {
-        return res.status(400).json({ message: 'Faltan datos obligatorios' });
+  if (!Nombre || !FechaHora || !Ubicacion) {
+    return res.status(400).json({ message: 'Faltan datos obligatorios' });
+  }
+
+  // Insertar evento
+  const eventoQuery = `INSERT INTO evento (Nombre, FechaHora, Ubicacion, Descripcion) VALUES (?, ?, ?, ?)`;
+  db.query(eventoQuery, [Nombre, FechaHora, Ubicacion, Descripcion], (err, result) => {
+    if (err) {
+      console.error('Error al insertar evento:', err);
+      return res.status(500).json({ message: 'Error al crear el evento' });
     }
 
-    const sql = `INSERT INTO evento (Nombre, FechaHora, Ubicacion, Descripcion) VALUES (?, ?, ?, ?)`;
+    const eventoId = result.insertId;
 
-    db.query(sql, [Nombre, FechaHora, Ubicacion, Descripcion], (err, result) => {
-        if (err) {
-            console.error('Error al insertar evento:', err);
-            return res.status(500).json({ message: 'Error en la base de datos' });
-        }
-        res.status(201).json({ message: 'Evento creado', id: result.insertId });
+    // Crear lista de canciones para el evento
+    const listaQuery = `INSERT INTO listaCanciones (EventoID) VALUES (?)`;
+    db.query(listaQuery, [eventoId], (err, result) => {
+      if (err) {
+        console.error('Error al insertar lista de canciones:', err);
+        return res.status(500).json({ message: 'Evento creado, pero ocurrió un error al crear la lista de canciones' });
+      }
+
+      const listaId = result.insertId;
+
+      // Insertar relaciones de canciones con la lista
+      if (Array.isArray(Canciones) && Canciones.length > 0) {
+        const values = Canciones.map(c => [c.id, listaId]);
+        const visualizacionQuery = `INSERT INTO visualizacion (CancionID, ListaCancionesID) VALUES ?`;
+
+        db.query(visualizacionQuery, [values], (err) => {
+          if (err) {
+            console.error('Error al insertar canciones en visualización:', err);
+            return res.status(500).json({ message: 'Evento y lista creados, pero ocurrió un error al relacionar canciones' });
+          }
+
+          res.status(201).json({ message: 'Evento, lista y canciones creados con éxito', eventoId });
+        });
+      } else {
+        // Si no hay canciones, solo confirmamos creación del evento y la lista
+        res.status(201).json({ message: 'Evento y lista creados sin canciones relacionadas', eventoId });
+      }
     });
-});
-
-// Obtener detalles de evento por ID
-router.get('/eventos/:id', (req, res) => {
-  const { id } = req.params;
-  const query = 'SELECT * FROM evento WHERE ID = ?';
-  db.query(query, [id], (err, results) => {
-    if (err) return res.status(500).json({ message: 'Error al obtener evento' });
-    if (results.length === 0) return res.status(404).json({ message: 'Evento no encontrado' });
-    res.json(results[0]);
   });
 });
 
@@ -121,6 +173,27 @@ router.put('/eventos/:id', (req, res) => {
     if (err) return res.status(500).json({ message: 'Error al actualizar evento' });
     if (result.affectedRows === 0) return res.status(404).json({ message: 'Evento no encontrado' });
     res.json({ message: 'Evento actualizado' });
+  });
+});
+
+//Renderizar canciones de la base de datos
+router.get('/canciones', (req, res) => {
+  const query = 'SELECT ID, Nombre FROM canciones ORDER BY Nombre ASC';
+  db.query(query, (err, results) => {
+    if (err) return res.status(500).json({ message: 'Error al obtener canciones' });
+    res.json(results);
+  });
+});
+
+
+// Obtener evento por ID
+router.get('/eventos/:id', (req, res) => {
+  const { id } = req.params;
+  const query = 'SELECT * FROM evento WHERE ID = ?';
+  db.query(query, [id], (err, results) => {
+    if (err) return res.status(500).json({ message: 'Error al obtener evento' });
+    if (results.length === 0) return res.status(404).json({ message: 'Evento no encontrado' });
+    res.json(results[0]);
   });
 });
 

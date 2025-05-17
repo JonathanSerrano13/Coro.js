@@ -22,14 +22,14 @@
         <div class="buscar-canciones">
             <button type="button" class="btn" onclick="window.location.href='listaCanciones.html'" ><span class="material-symbols-outlined">chevron_left</span></button>
             <input type="text" id="busqueda" placeholder="Buscar canción">
-            <button type="submit" class="btn-agregar" id="btn-agregar" onclick="window.location.href='listaCanciones.html'" ><i class="fi fi-rr-add"></i></button>
+            <button type="button" class="btn-agregar" id="btn-agregar-canciones" onclick="window.location.href='listaCanciones.html'" ><i class="fi fi-rr-add"></i></button>
         </div>
 
         <div class="lista">
             <ul id="lista-canciones">
                 <li class="item">
-                    <input type="checkbox" id="cancion[0]" name="canciones" value="[0]">
-                    <label for="cancion[0]">cancion[1]</label>
+                    <input type="checkbox" id="cancion1" name="canciones" value="cancion1">
+                    <label for="cancion1">cancion[1]</label>
                 </li>
                    <!-- Aquí se generarán las canciones dinámicamente -->
                 </li>
@@ -38,7 +38,7 @@
      </form>   
     </div>
 
-    <script src="js/canciones.js"></script>
+    <script src="../js/canciones.js"></script>
 
 </body>
 

@@ -17,11 +17,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const fechaHora = `${fecha} ${hora}:00`;
 
+        // Recuperar la lista de canciones guardada en localStorage
+        let listaCanciones = [];
+        const cancionesJSON = localStorage.getItem('listaCancionesSeleccionadas');
+        if (cancionesJSON) {
+            try {
+                listaCanciones = JSON.parse(cancionesJSON);
+            } catch (error) {
+                console.error('Error al parsear lista de canciones:', error);
+            }
+        }
+
         const data = {
             Nombre: nombre,
             FechaHora: fechaHora,
             Ubicacion: ubicacion,
             Descripcion: descripcion || null,
+            Canciones: listaCanciones // Enviamos la lista de canciones junto con el evento
         };
 
         try {
@@ -33,6 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (res.ok) {
                 alert('Evento creado con éxito');
+                // Limpiar la lista localStorage para evitar datos obsoletos
+                localStorage.removeItem('listaCancionesSeleccionadas');
                 window.location.href = 'Eventos.html';
             } else {
                 const errorData = await res.json();
@@ -45,8 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-
-//Para inhabilitar la seleccion de dias que no son actuales 
 document.addEventListener('DOMContentLoaded', function () {
     const fechaInput = document.getElementById('fecha');
     const hoy = new Date();
@@ -54,13 +66,5 @@ document.addEventListener('DOMContentLoaded', function () {
     const mes = String(hoy.getMonth() + 1).padStart(2, '0');
     const dia = String(hoy.getDate()).padStart(2, '0');
     const fechaMin = `${anio}-${mes}-${dia}`;
-    fechaInput.min = fechaMin; // Establece la fecha mínima
+    fechaInput.min = fechaMin;
 });
-
-
-//Abrir google-maps en ubicacion.
-function abrirGoogleMaps() {
-    window.open("https://www.google.com/maps", "_blank");
-}
-
-

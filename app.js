@@ -10,6 +10,8 @@ app.use(express.urlencoded({ extended: true })); // para recibir datos de formul
 
 app.use('/api', apiRoutes);
 
-app.listen(3000, () => {
-  console.log('Servidor iniciado en puerto 3000');
+// Puerto
+const PORT = process.env.PORT || 3000; // Soporte para variable de entorno
+app.listen(PORT, () => {
+  console.log(`Servidor iniciado en puerto ${PORT}`);
 });

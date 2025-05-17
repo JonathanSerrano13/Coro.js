@@ -9,7 +9,7 @@ form.addEventListener('submit', async (e) => {
   const password = form.password.value.trim();
   const rol = form.rol.value;
 
-  const res = await fetch('/registro', {
+  const res = await fetch('/api/registro', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ nombre, email, telefono, password, rol }),
@@ -22,5 +22,13 @@ form.addEventListener('submit', async (e) => {
     window.location.href = '/index.html';
   } else {
     alert(data.message || 'Error en registro');
+  }
+});
+
+const input = document.querySelector('input[type="number"]');
+
+input.addEventListener('keydown', (event) => {
+  if (event.key.toLowerCase() === 'e' || event.key === '+' || event.key === '-') {
+    event.preventDefault();
   }
 });

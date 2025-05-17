@@ -75,12 +75,12 @@ router.delete('/eventos/:id', (req, res) => {
   // Borrar relaciones en visualizacion (canciones relacionadas)
   const deleteVisualizacion = `
     DELETE v FROM visualizacion v
-    INNER JOIN listaCanciones l ON v.ListaCancionesID = l.ID
+    INNER JOIN listacanciones l ON v.ListaCancionesID = l.ID
     WHERE l.EventoID = ?
   `;
 
   // Borrar lista de canciones asociada al evento
-  const deleteListaCanciones = 'DELETE FROM listaCanciones WHERE EventoID = ?';
+  const deleteListaCanciones = 'DELETE FROM listacanciones WHERE EventoID = ?';
 
   // Borrar evento
   const deleteEvento = 'DELETE FROM evento WHERE ID = ?';
@@ -129,7 +129,7 @@ router.post('/eventos', (req, res) => {
     const eventoId = result.insertId;
 
     // Crear lista de canciones para el evento
-    const listaQuery = `INSERT INTO listaCanciones (EventoID) VALUES (?)`;
+    const listaQuery = `INSERT INTO listaanciones (EventoID) VALUES (?)`;
     db.query(listaQuery, [eventoId], (err, result) => {
       if (err) {
         console.error('Error al insertar lista de canciones:', err);
@@ -197,4 +197,31 @@ router.get('/eventos/:id', (req, res) => {
   });
 });
 
+// OBTENER CANCIONES por ID
+// Ejemplo: Obtener canciones asociadas a un evento
+router.get('/eventos/:id/canciones', (req, res) => {
+  const { id: eventoId } = req.params;
+
+  // Ajuste de la consulta para obtener canciones relacionadas con el evento
+  const query = `
+    SELECT c.ID, c.Nombre
+    FROM canciones c
+    INNER JOIN visualizacion v ON c.ID = v.CancionID
+    INNER JOIN listacanciones l ON v.ListaCancionesID = l.ID
+    WHERE l.EventoID = ?
+  `;
+
+  db.query(query, [eventoId], (err, results) => {
+    if (err) {
+      console.error('Error al obtener canciones:', err);
+      return res.status(500).json({ message: 'Error al obtener canciones' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No se encontraron canciones para este evento' });
+    }
+
+    res.json(results);
+  });
+});
 module.exports = router;

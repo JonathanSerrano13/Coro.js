@@ -69,3 +69,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btnCanciones = document.getElementById('ver-canciones-btn');
+
+  // Aquí define o pasa el ID del evento
+  const eventoId = obtenerIdEvento(); // Reemplaza con la lógica para obtener el ID
+
+  // Añadir evento de clic al botón
+  btnCanciones.addEventListener('click', () => {
+    if (eventoId) {
+      // Redirige a listaCancionesAgregadas.html con el ID del evento como query parameter
+      window.location.href = `listaCancionesAgregadas.html?id=${eventoId}`;
+    } else {
+      alert('No se pudo obtener el ID del evento.');
+    }
+  });
+
+  // Ejemplo de función para obtener el ID del evento
+  function obtenerIdEvento() {
+    // Lógica para obtener el ID del evento (puede ser de la URL o datos locales)
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('id'); // Ajusta según cómo pases el ID
+  }
+});

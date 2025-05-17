@@ -1,7 +1,7 @@
 body {
     font-family: 'Poppins', sans-serif;
     background: linear-gradient(135deg, #ffffff, #e8bea8, #b57a68);
-    background-attachment:fixed ;
+    background-attachment: fixed;
     display: flex;
     justify-content: center;
     min-height: 100vh;
@@ -29,7 +29,8 @@ label {
     margin-top: 5px;
 }
 
-input,textarea {
+input,
+textarea {
     width: 95%;
     padding: 13px;
     margin-top: 5px;
@@ -49,6 +50,26 @@ input,textarea {
     flex: 1;
 }
 
+.btnMapa {
+    text-align: end;
+    margin-top: 5px;
+    border: none;
+}
+
+.btnMapa button {
+    margin-top: 5px;
+    border: none;
+    padding: 10px 30px 10px 30px;
+    border-radius: 10px;
+    cursor:pointer;
+}
+
+.btnMapa button:hover{
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+
+
 .acciones {
     display: flex;
     justify-content: center;
@@ -66,20 +87,20 @@ input,textarea {
     border-radius: 10px;
     font-size: 16px;
     cursor: pointer;
-    transition:0.3s;
+    transition: 0.3s;
 }
 
 .acciones button:hover {
     background-color: #8c6b62;
-} 
+}
 
 
 @media (max-height: 600px) {
     .contenedor {
-      max-height: 90vh;
+        max-height: 90vh;
     }
-    
+
     h1 {
-      font-size: 28px;
+        font-size: 28px;
     }
-  }
+}

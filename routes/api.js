@@ -29,7 +29,7 @@ router.post('/login', (req, res) => {
     });
 });
 
-
+//Ruta para registro
 router.post('/registro', (req, res) => {
   const { nombre, email, telefono, password, rol } = req.body;
 
@@ -178,7 +178,7 @@ router.put('/eventos/:id', (req, res) => {
 
 //Renderizar canciones de la base de datos
 router.get('/canciones', (req, res) => {
-  const query = 'SELECT ID, Nombre FROM canciones ORDER BY Nombre ASC';
+  const query = 'SELECT ID, Nombre, Partitura, Letra FROM canciones ORDER BY Nombre ASC';
   db.query(query, (err, results) => {
     if (err) return res.status(500).json({ message: 'Error al obtener canciones' });
     res.json(results);

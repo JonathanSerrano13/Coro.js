@@ -84,6 +84,11 @@ label{
   height: 50px;
 }
 
+.acciones {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 @media (max-height: 600px) {
     .contenedor {

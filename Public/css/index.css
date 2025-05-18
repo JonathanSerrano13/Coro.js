@@ -74,12 +74,28 @@ h1 {
     border-radius: 10px;
     cursor: pointer;
     transition:0.3s;
+    margin-top: 10px;
 }
 
 .btn:hover {
     background-color: #8c6b62;
 }
 
+.forgot-password {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.forgot-password a {
+    color: black; /* color azul típico de links */
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.forgot-password a:hover {
+    text-decoration: underline;
+}
 
 @media (max-height: 600px) {
     .contenedor {

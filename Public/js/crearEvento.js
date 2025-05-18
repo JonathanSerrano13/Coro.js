@@ -68,3 +68,4 @@ document.addEventListener('DOMContentLoaded', function () {
     const fechaMin = `${anio}-${mes}-${dia}`;
     fechaInput.min = fechaMin;
 });
+

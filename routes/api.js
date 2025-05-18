@@ -129,7 +129,7 @@ router.post('/eventos', (req, res) => {
     const eventoId = result.insertId;
 
     // Crear lista de canciones para el evento
-    const listaQuery = `INSERT INTO listaanciones (EventoID) VALUES (?)`;
+    const listaQuery = `INSERT INTO listacanciones (EventoID) VALUES (?)`;
     db.query(listaQuery, [eventoId], (err, result) => {
       if (err) {
         console.error('Error al insertar lista de canciones:', err);
@@ -204,7 +204,7 @@ router.get('/eventos/:id/canciones', (req, res) => {
 
   // Ajuste de la consulta para obtener canciones relacionadas con el evento
   const query = `
-    SELECT c.ID, c.Nombre
+    SELECT c.ID, c.Nombre, c.Partitura, c.Letra, v.ID AS visualizacionID
     FROM canciones c
     INNER JOIN visualizacion v ON c.ID = v.CancionID
     INNER JOIN listacanciones l ON v.ListaCancionesID = l.ID
@@ -224,4 +224,64 @@ router.get('/eventos/:id/canciones', (req, res) => {
     res.json(results);
   });
 });
+
+// Agregar canciones a un evento específico
+router.post('/eventos/:id/agregar-canciones', (req, res) => {
+  const { id: eventoId } = req.params;
+  const { canciones } = req.body; // Espera un arreglo de IDs
+
+  if (!Array.isArray(canciones) || canciones.length === 0) {
+    return res.status(400).json({ message: 'Se requiere un arreglo de canciones' });
+  }
+
+  // Primero obtener el ID de la lista de canciones asociada al evento
+  const listaQuery = 'SELECT ID FROM listacanciones WHERE EventoID = ?';
+  db.query(listaQuery, [eventoId], (err, results) => {
+    if (err) {
+      console.error('Error al obtener lista de canciones:', err);
+      return res.status(500).json({ message: 'Error al obtener lista de canciones' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No existe lista de canciones para este evento' });
+    }
+
+    const listaId = results[0].ID;
+
+    // Preparar valores para insertar en visualizacion (CancionID, ListaCancionesID)
+    const values = canciones.map(cancionId => [cancionId, listaId]);
+
+    // Insertar las nuevas relaciones en visualizacion
+    const insertQuery = 'INSERT INTO visualizacion (CancionID, ListaCancionesID) VALUES ?';
+    db.query(insertQuery, [values], (err) => {
+      if (err) {
+        console.error('Error al agregar canciones:', err);
+        return res.status(500).json({ message: 'Error al agregar canciones al evento' });
+      }
+
+      res.json({ message: 'Canciones agregadas con éxito' });
+    });
+  });
+});
+
+
+// Borrar una relación específica en visualizacion
+router.delete('/visualizacion/:id', (req, res) => {
+  const { id } = req.params;
+  const deleteQuery = 'DELETE FROM visualizacion WHERE ID = ?';
+
+  db.query(deleteQuery, [id], (err, result) => {
+    if (err) {
+      console.error('Error al borrar la relación:', err);
+      return res.status(500).json({ message: 'Error al borrar la relación' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Relación no encontrada' });
+    }
+
+    res.json({ message: 'Relación eliminada con éxito' });
+  });
+});
+
 module.exports = router;

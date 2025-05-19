@@ -1,16 +1,48 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const listaEventos = document.getElementById('lista-eventos');
   const buscarInput = document.getElementById('buscar-input');
+  const crearEventoBtn = document.getElementById('crear-evento-btn');
 
+  let rolUsuario = null;
+
+  // Obtener rol de usuario
+  async function obtenerRol() {
+    try {
+      const res = await fetch('/api/usuario');
+      if (!res.ok) throw new Error('No autorizado o error en rol');
+      const data = await res.json();
+      return data.rol;
+    } catch (error) {
+      console.error('Error obteniendo rol:', error);
+      return null;
+    }
+  }
+
+  // Ocultar botones si rol es Integrante
+  function ajustarUIsegunRol() {
+    if (rolUsuario === 'Integrante') {
+      // Ocultar botón crear
+      if (crearEventoBtn) crearEventoBtn.style.display = 'none';
+
+      // Ocultar botones borrar en la lista
+      document.querySelectorAll('.btn-borrar').forEach(btn => {
+        btn.style.display = 'none';
+      });
+    }
+  }
+
+  // Cargar eventos y mostrar lista
   async function cargarEventos() {
     try {
       const res = await fetch('/api/eventos');
+      if (!res.ok) throw new Error('Error al cargar eventos');
       const eventos = await res.json();
 
       listaEventos.innerHTML = '';
 
       if (eventos.length === 0) {
         listaEventos.innerHTML = '<li>No hay eventos disponibles.</li>';
+        ajustarUIsegunRol()
         return;
       }
 
@@ -26,12 +58,11 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="acciones">
             <button class="btn-ver-detalles" onclick="verDetalles(${evento.ID})">Detalles</button>
-            <button class="btn-borrar"> <i class="fi fi-rr-trash"></i> </button>
+            <button class="btn-borrar"><i class="fi fi-rr-trash"></i></button>
           </div>
         `;
 
         li.querySelector('.btn-borrar').addEventListener('click', () => {
-          // Usar showConfirm en lugar de confirm
           showConfirm(`¿Eliminar evento "${evento.Nombre}"?`, async (confirmado) => {
             if (confirmado) {
               await borrarEvento(evento.ID);
@@ -41,6 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         listaEventos.appendChild(li);
       });
+
+      // Ajustar UI después de crear la lista (para ocultar botones borrar si rol es Integrante)
+      ajustarUIsegunRol();
+
     } catch (error) {
       console.error('Error al cargar eventos:', error);
       showAlert('Error al cargar eventos.', 'error');
@@ -73,9 +108,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Obtener rol, cargar eventos y ajustar UI
+  rolUsuario = await obtenerRol();
   cargarEventos();
 
-  // Función para mostrar alerta (igual a la tuya)
+  // --- Funciones showAlert y showConfirm (igual que antes) ---
+
   function showAlert(message, type) {
     const alertDiv = document.createElement('div');
     alertDiv.textContent = message;
@@ -100,9 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
   }
 
-  // Función para mostrar confirmación personalizada
   function showConfirm(message, callback) {
-    // Crear overlay
     const overlay = document.createElement('div');
     overlay.style.position = 'fixed';
     overlay.style.top = 0;
@@ -115,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.style.alignItems = 'center';
     overlay.style.zIndex = '1100';
 
-    // Crear caja de confirmación
     const box = document.createElement('div');
     box.style.backgroundColor = '#fff';
     box.style.padding = '20px 30px';
@@ -126,7 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
     box.style.fontSize = '16px';
     box.textContent = message;
 
-    // Crear botones
     const btnConfirm = document.createElement('button');
     btnConfirm.textContent = 'Sí';
     btnConfirm.style.margin = '10px';
@@ -147,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCancel.style.borderRadius = '5px';
     btnCancel.style.cursor = 'pointer';
 
-    // Contenedor botones
     const buttonsDiv = document.createElement('div');
     buttonsDiv.style.marginTop = '15px';
     buttonsDiv.appendChild(btnConfirm);

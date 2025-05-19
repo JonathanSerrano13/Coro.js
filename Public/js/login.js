@@ -14,14 +14,10 @@ document.getElementById('loginForm').addEventListener('submit', async function (
         const data = await res.json();
 
         if (res.ok) {
+            // Mostrar el rol en la consola
+            console.log('Rol del usuario:', data.user.rol);
+
             showAlert('Iniciaste sesión', 'success');
-
-            // Guardar datos de usuario en localStorage
-            localStorage.setItem('user', JSON.stringify(data.user));
-
-            // Guardar rol en sessionStorage para control de UI
-            sessionStorage.setItem('userRole', data.user.rol || 'integrante');
-
             setTimeout(() => {
                 window.location.href = '/View/Eventos.html';
             }, 1000);

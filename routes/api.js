@@ -23,6 +23,10 @@ router.post('/login', (req, res) => {
     const user = results[0];
 
     if (password === user.Contraseña) {
+      // Guardar datos en sesión
+      req.session.userId = user.ID;
+      req.session.userRol = user.Rol;
+
       return res.json({ message: 'Login exitoso', user: { id: user.ID, nombre: user.Nombre, rol: user.Rol } });
     } else {
       return res.status(401).json({ message: 'Contraseña incorrecta' });
@@ -57,15 +61,50 @@ router.post('/registro', (req, res) => {
   });
 });
 
+
+// Middleware para simular sesión (ajusta según tu sistema real)
+function authMiddleware(req, res, next) {
+  req.session = req.session || {};
+  req.session.user = req.session.userId || { Rol: 'Integrante' }; // o 'Admin'
+
+  console.log('Rol del usuario en sesión:', req.session.userRol);
+
+  next();
+}
+
+router.use(authMiddleware);
+
+// Endpoint para obtener el rol del usuario actual
+router.get('/usuario', (req, res) => {
+  if (!req.session.userId) {
+    console.log('No autenticado');
+    return res.status(401).json({ message: 'No autenticado' });
+  }
+
+  console.log('Rol solicitado:', req.session.userRol);
+  res.json({ rol: req.session.userRol });
+});
+
 // Obtener lista de eventos (solo id y nombre)
 router.get('/eventos', (req, res) => {
+  const userRol = req.session.userRol;  // Aquí obtienes el rol del usuario desde la sesión
+
   const query = 'SELECT ID, Nombre FROM evento ORDER BY FechaHora DESC';
   db.query(query, (err, results) => {
     if (err) return res.status(500).json({ message: 'Error al obtener eventos' });
-    res.json(results);
+
+    // Añadir propiedad "permisos" según el rol
+    const eventosConPermisos = results.map(evento => ({
+      ...evento,
+      permisos: {
+        puedeBorrar: userRol === 'Administrador',
+        puedeEditar: userRol === 'Administrador'
+      }
+    }));
+
+    res.json(eventosConPermisos);
   });
 });
-
 
 // Borrar evento por ID
 router.delete('/eventos/:id', (req, res) => {

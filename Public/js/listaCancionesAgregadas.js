@@ -8,9 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Botón agregar canciones
     const btnAgregarCanciones = document.getElementById('btn-agregar-canciones');
     if (btnAgregarCanciones) {
-        btnAgregarCanciones.addEventListener('click', () => {
-            window.location.href = `Canciones.html?id=${eventoId}`;
-        });
+        btnAgregarCanciones.style.display = 'none'; // Oculto por defecto, se muestra solo si es Admin
     } else {
         console.error('No se encontró el botón para agregar canciones.');
     }
@@ -75,6 +73,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // Función para obtener rol del usuario
+    async function obtenerRolUsuario() {
+        try {
+            const res = await fetch('/api/usuario');
+            if (!res.ok) throw new Error('No autenticado');
+            const data = await res.json();
+            return data.rol;
+        } catch {
+            return null;
+        }
+    }
+
     // Función para mostrar modal alerta confirmación personalizada
     function mostrarConfirmacion(mensaje) {
         return new Promise((resolve) => {
@@ -134,6 +144,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         modal.style.display = 'flex';
     }
 
+    // Mostrar error con modal alerta
+    function mostrarError(mensaje) {
+        mensajeAlerta.textContent = mensaje;
+        btnConfirmar.style.display = 'none';
+        btnCancelar.textContent = 'Cerrar';
+        modalAlerta.style.display = 'flex';
+
+        btnCancelar.onclick = () => {
+            modalAlerta.style.display = 'none';
+            btnConfirmar.style.display = 'inline-block';
+            btnCancelar.textContent = 'Cancelar';
+            btnCancelar.onclick = null;
+        };
+    }
+
+    const rolUsuario = await obtenerRolUsuario();
+
+    // Mostrar botón agregar canciones solo si es Admin
+    if (rolUsuario === 'Administrador' && btnAgregarCanciones) {
+        btnAgregarCanciones.style.display = 'inline-block';
+    }
+
     // Cargar canciones del evento
     async function cargarCanciones() {
         try {
@@ -150,6 +182,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             canciones.forEach(cancion => {
                 const li = document.createElement('li');
                 li.classList.add('item');
+
+                // Solo mostrar botón borrar si es Admin
+                const botonBorrarHTML = rolUsuario === 'Administrador'
+                    ? `<button class="btn-borrar"><i class="fi fi-rr-trash"></i></button>`
+                    : '';
+
                 li.innerHTML = `
                     <span class="icono">♦</span>
                     <div class="info-evento">
@@ -157,19 +195,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                     <div class="acciones">
                         <button class="btn-ver-letra-partitura"><i class="fi fi-rr-overview"></i></button>
-                        <button class="btn-borrar"><i class="fi fi-rr-trash"></i></button>
+                        ${botonBorrarHTML}
                     </div>
                 `;
 
-                // Evento para borrar canción con confirmación modal
-                li.querySelector('.btn-borrar').addEventListener('click', async () => {
-                    const confirmDelete = await mostrarConfirmacion(`¿Eliminar canción "${cancion.Nombre}"?`);
-                    if (confirmDelete) {
-                        borrarRelacion(cancion.visualizacionID);
-                    }
-                });
+                // Evento para borrar canción con confirmación modal (solo si admin)
+                if (rolUsuario === 'Administrador' && li.querySelector('.btn-borrar')) {
+                    li.querySelector('.btn-borrar').addEventListener('click', async () => {
+                        const confirmDelete = await mostrarConfirmacion(`¿Eliminar canción "${cancion.Nombre}"?`);
+                        if (confirmDelete) {
+                            borrarRelacion(cancion.visualizacionID);
+                        }
+                    });
+                }
 
-                // Evento para mostrar modal con letra/partitura
+                // Evento para mostrar modal con letra/partitura (todos pueden)
                 li.querySelector('.btn-ver-letra-partitura').addEventListener('click', () => {
                     mostrarModal(cancion);
                 });
@@ -178,18 +218,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         } catch (error) {
             console.error('Error al cargar canciones:', error);
-            // Usar modal para mostrar error
-            mensajeAlerta.textContent = 'Error al cargar canciones.';
-            btnConfirmar.style.display = 'none';
-            btnCancelar.textContent = 'Cerrar';
-            modalAlerta.style.display = 'flex';
-
-            btnCancelar.onclick = () => {
-                modalAlerta.style.display = 'none';
-                btnConfirmar.style.display = 'inline-block';
-                btnCancelar.textContent = 'Cancelar';
-                btnCancelar.onclick = null;
-            };
+            mostrarError('Error al cargar canciones.');
         }
     }
 
@@ -205,21 +234,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             mostrarError('Error al eliminar la relación.');
         }
-    }
-
-    // Mostrar error con modal alerta
-    function mostrarError(mensaje) {
-        mensajeAlerta.textContent = mensaje;
-        btnConfirmar.style.display = 'none';
-        btnCancelar.textContent = 'Cerrar';
-        modalAlerta.style.display = 'flex';
-
-        btnCancelar.onclick = () => {
-            modalAlerta.style.display = 'none';
-            btnConfirmar.style.display = 'inline-block';
-            btnCancelar.textContent = 'Cancelar';
-            btnCancelar.onclick = null;
-        };
     }
 
     cargarCanciones();

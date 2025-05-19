@@ -11,7 +11,7 @@ app.use(express.urlencoded({ extended: true })); // para recibir datos de formul
 
 // Configurar sesión
 app.use(session({
-  secret: '', // cámbialo por algo más seguro y secreto
+  secret: '1234', // cámbialo por algo más seguro y secreto
   resave: false,
   saveUninitialized: false,
   cookie: {

@@ -85,6 +85,17 @@ router.get('/usuario', (req, res) => {
   res.json({ rol: req.session.userRol });
 });
 
+// Ruta para cerrar sesión
+router.post('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      return res.status(500).json({ message: 'Error al cerrar sesión' });
+    }
+    res.clearCookie('connect.sid'); // El nombre de la cookie por defecto de express-session
+    res.json({ message: 'Sesión cerrada correctamente' });
+  });
+});
+
 // Obtener lista de eventos (solo id y nombre)
 router.get('/eventos', (req, res) => {
   const userRol = req.session.userRol;  // Aquí obtienes el rol del usuario desde la sesión

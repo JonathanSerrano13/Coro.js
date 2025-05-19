@@ -1,4 +1,30 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  // Tu código original...
+  
+  // Función para cerrar sesión
+  async function logout() {
+    try {
+      const res = await fetch('/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (res.ok) {
+        window.location.href = '../index.html';
+      } else {
+        showAlert('Error al cerrar sesión', 'error');
+      }
+    } catch {
+      showAlert('Error de red al cerrar sesión', 'error');
+    }
+  }
+
+  // Asociar botón cerrar sesión (si existe)
+  const btnCerrarSesion = document.getElementById('btn-cerrar-sesion');
+  if (btnCerrarSesion) {
+    btnCerrarSesion.addEventListener('click', logout);
+  }
+
+  // El resto de tu código original...
   const listaEventos = document.getElementById('lista-eventos');
   const buscarInput = document.getElementById('buscar-input');
   const crearEventoBtn = document.getElementById('crear-evento-btn');
@@ -21,17 +47,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Ocultar botones si rol es Integrante
   function ajustarUIsegunRol() {
     if (rolUsuario === 'Integrante') {
-      // Ocultar botón crear
       if (crearEventoBtn) crearEventoBtn.style.display = 'none';
-
-      // Ocultar botones borrar en la lista
       document.querySelectorAll('.btn-borrar').forEach(btn => {
         btn.style.display = 'none';
       });
     }
   }
 
-  // Cargar eventos y mostrar lista
   async function cargarEventos() {
     try {
       const res = await fetch('/api/eventos');
@@ -73,7 +95,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         listaEventos.appendChild(li);
       });
 
-      // Ajustar UI después de crear la lista (para ocultar botones borrar si rol es Integrante)
       ajustarUIsegunRol();
 
     } catch (error) {
@@ -108,11 +129,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // Obtener rol, cargar eventos y ajustar UI
   rolUsuario = await obtenerRol();
   cargarEventos();
 
-  // --- Funciones showAlert y showConfirm (igual que antes) ---
+  // Funciones showAlert y showConfirm (igual que antes)
 
   function showAlert(message, type) {
     const alertDiv = document.createElement('div');

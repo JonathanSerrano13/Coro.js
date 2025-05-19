@@ -18,10 +18,13 @@ form.addEventListener('submit', async (e) => {
   const data = await res.json();
 
   if (res.ok) {
-    alert('Registro exitoso');
-    window.location.href = '/index.html';
+    showAlert('Registro exitoso', 'success');
+    // Puedes retrasar el redireccionamiento para que se vea el mensaje un momento
+    setTimeout(() => {
+      window.location.href = '/index.html';
+    }, 1500);
   } else {
-    alert(data.message || 'Error en registro');
+    showAlert(data.message || 'Error en registro', 'error');
   }
 });
 
@@ -32,3 +35,21 @@ input.addEventListener('keydown', (event) => {
     event.preventDefault();
   }
 });
+
+function showAlert(message, type = 'info') {
+  // Elimina alertas anteriores para evitar acumulación
+  const existingAlert = document.querySelector('.custom-alert');
+  if (existingAlert) existingAlert.remove();
+
+  const alertDiv = document.createElement('div');
+  alertDiv.textContent = message;
+  alertDiv.className = `custom-alert ${type}`;
+
+  // Inserta el alert al inicio del formulario
+  form.prepend(alertDiv);
+
+  // Autoelimina después de 3 segundos
+  setTimeout(() => {
+    alertDiv.remove();
+  }, 3000);
+}

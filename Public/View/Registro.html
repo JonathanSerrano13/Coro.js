@@ -66,19 +66,26 @@
     <script src="../js/registro.js"></script>
     <script>
         // Alternar la visibilidad de la contraseña
-        document.getElementById('togglePassword').addEventListener('click', function () {
-            const passwordField = document.getElementById('password');
-            const isPasswordVisible = passwordField.type === 'password';
-            passwordField.type = isPasswordVisible ? 'text' : 'password';
+        document.addEventListener('DOMContentLoaded', () => {
+            const passwordInput = document.getElementById('password');
+            const togglePasswordButton = document.getElementById('togglePassword');
+            const iconEye = togglePasswordButton.querySelector('i'); // Ícono dentro del span
 
-            const icon = this.querySelector('i');
-            if (isPasswordVisible) {
-                icon.className = "fi fi-rs-eye-slash";
-            } else {
-                icon.className = "fi fi-rr-eye-crossed"
-            }
+            togglePasswordButton.addEventListener('click', () => {
+                // Alternar el tipo de input entre 'password' y 'text'
+                const isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+
+                // Cambiar el ícono según el estado
+                if (isPassword) {
+                    iconEye.classList.remove('fi fi-rs-eye');
+                    iconEye.classList.add('fi fi-rs-crossed-eye');
+                } else {
+                    iconEye.classList.remove('');
+                    iconEye.classList.add('fi fi-rs-eye');
+                }
+            });
         });
-
     </script>
 </body>
 

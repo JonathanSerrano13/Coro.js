@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('form-crear-evento');
+    let eventoCreado = false;
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -11,13 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const descripcion = document.getElementById('descripcion').value.trim();
 
         if (!nombre || !fecha || !hora || !ubicacion) {
-            alert('Por favor, completa todos los campos obligatorios');
+            showAlert('Por favor, completa todos los campos obligatorios', 'error');
             return;
         }
 
         const fechaHora = `${fecha} ${hora}:00`;
 
-        // Recuperar la lista de canciones guardada en localStorage
         let listaCanciones = [];
         const cancionesJSON = localStorage.getItem('listaCancionesSeleccionadas');
         if (cancionesJSON) {
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
             FechaHora: fechaHora,
             Ubicacion: ubicacion,
             Descripcion: descripcion || null,
-            Canciones: listaCanciones // Enviamos la lista de canciones junto con el evento
+            Canciones: listaCanciones
         };
 
         try {
@@ -44,22 +44,29 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (res.ok) {
-                alert('Evento creado con éxito');
-                // Limpiar la lista localStorage para evitar datos obsoletos
+                showAlert('Evento creado con éxito', 'success');
+                eventoCreado = true;
                 localStorage.removeItem('listaCancionesSeleccionadas');
-                window.location.href = 'Eventos.html';
+
+                setTimeout(() => {
+                    window.location.href = 'Eventos.html';
+                }, 1000);
             } else {
                 const errorData = await res.json();
-                alert('Error al crear evento: ' + (errorData.message || res.statusText));
+                showAlert('Error al crear evento: ' + (errorData.message || res.statusText), 'error');
             }
         } catch (error) {
-            alert('Error en la conexión al servidor');
+            showAlert('Error en la conexión al servidor', 'error');
             console.error(error);
         }
     });
-});
 
-document.addEventListener('DOMContentLoaded', function () {
+    window.addEventListener('beforeunload', (e) => {
+        if (!eventoCreado) {
+            localStorage.removeItem('listaCancionesSeleccionadas');
+        }
+    });
+
     const fechaInput = document.getElementById('fecha');
     const hoy = new Date();
     const anio = hoy.getFullYear();
@@ -69,3 +76,27 @@ document.addEventListener('DOMContentLoaded', function () {
     fechaInput.min = fechaMin;
 });
 
+// Añade la función showAlert aquí o impórtala si la tienes en otro archivo
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.textContent = message;
+    alertDiv.className = `alert alert-${type}`;
+
+    document.body.appendChild(alertDiv);
+
+    alertDiv.style.position = 'fixed';
+    alertDiv.style.top = '20px';
+    alertDiv.style.left = '50%';
+    alertDiv.style.transform = 'translateX(-50%)';
+    alertDiv.style.padding = '10px 20px';
+    alertDiv.style.color = '#fff';
+    alertDiv.style.backgroundColor = type === 'success' ? '#4caf50' : '#f44336';
+    alertDiv.style.borderRadius = '5px';
+    alertDiv.style.zIndex = '1000';
+    alertDiv.style.boxShadow = '0px 4px 6px rgba(0,0,0,0.1)';
+    alertDiv.style.fontSize = '16px';
+
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 1000);
+}

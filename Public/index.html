@@ -6,15 +6,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&display=swap" rel="stylesheet">
-    <meta charset="UTF-8">
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-straight/css/uicons-regular-straight.css'>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Inicio de Sesión</title>
     <link rel="stylesheet" href="./css/index.css">
-    
+
 </head>
 
 <body>
-
 
     <div class="contenedor">
         <div class="logo">
@@ -24,23 +26,55 @@
         <form id="loginForm">
             <div class="fields">
                 <div class="field">
-                     <label for="email">CORREO</label>
-                    <input type="email" id="email" name="email" placeholder="Ingresa tu correo" required >
+                    <label for="email">CORREO</label>
+                    <input type="email" id="email" name="email" placeholder="Ingresa tu correo" required>
                 </div>
                 <div class="field">
                     <label for="password">CONTRASEÑA</label>
-                    <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña" required autocomplete="off">
+                    <div style="position: relative;">
+                        <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña"
+                            required>
+                        <span id="togglePassword"
+                            style="position: absolute; top: 57%; right: 60px; transform: translateY(-50%); cursor: pointer; font-size: 30px;"><i
+                                class="fi fi-rs-eye"></i></span>
+                    </div>
                 </div>
             </div>
             <div class="actions">
-                <button type="button" class="btn" onclick="window.location.href='/View/Registro.html'"">Registrar</button>
-                <button type="submit" class="btn" ><!--</button>onclick="window.location.href='Vistas/Eventos.html'" >-->Iniciar sesión</button>
+                <button type="button" class="btn" onclick="window.location.href='/View/Registro.html'">Registrar</button>
+                <button type=" submit"
+                    class="btn"><!--</button>onclick="window.location.href='Vistas/Eventos.html'" >-->Iniciar
+                    sesión</button>
             </div>
         </form>
 
     </div>
 
-    <script src="./js/login.js"></script> 
+    <script src="./js/login.js"></script>
+
+    <script>
+        // Alternar la visibilidad de la contraseña
+        document.addEventListener('DOMContentLoaded', () => {
+            const passwordInput = document.getElementById('password');
+            const togglePasswordButton = document.getElementById('togglePassword');
+            const iconEye = togglePasswordButton.querySelector('i'); // Ícono dentro del span
+
+            togglePasswordButton.addEventListener('click', () => {
+                // Alternar el tipo de input entre 'password' y 'text'
+                const isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+
+                // Cambiar el ícono según el estado
+                if (isPassword) {
+                    iconEye.classList.remove('fi fi-rs-eye');
+                    iconEye.classList.add('fi fi-rs-crossed-eye');
+                } else {
+                    iconEye.classList.remove('');
+                    iconEye.classList.add('fi fi-rs-eye');
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

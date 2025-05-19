@@ -73,6 +73,33 @@ input,textarea {
     background-color: #8c6b62;
 } 
 
+.custom-alert {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 320px;
+  padding: 8px 14px;
+  border-radius: 5px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: white;
+  opacity: 0.95;
+  z-index: 9999;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  animation: fadeInOut 3s forwards;
+}
+
+.custom-alert.success {
+  background-color: #4caf50; /* verde */
+}
+
+.custom-alert.error {
+  background-color: #f44336; /* rojo */
+}
+
+
+
 
 @media (max-height: 600px) {
     .contenedor {

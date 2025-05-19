@@ -99,41 +99,33 @@ h1 {
     background-color: #8c6b62;
 }
 
-.alert-container {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
+.custom-alert {
+  position: fixed;
+  top: 10px;             /* separación del borde superior */
+  left: 50%;             /* centrado horizontal */
+  transform: translateX(-50%);
+  max-width: 320px;
+  padding: 8px 14px;
+  border-radius: 5px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: white;
+  opacity: 0.95;
+  z-index: 9999;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  animation: fadeInOut 3s forwards;
 }
 
-.alert {
-    padding: 15px;
-    border-radius: 5px;
-    font-size: 14px;
-    color: #fff;
-    margin: 10px 0;
-    display: none; /* Inicialmente oculto */
-    transition: opacity 0.5s ease;
+.custom-alert.success {
+  background-color: #4caf50;
 }
 
-.alert-danger {
-    background-color: #f44336;
+.custom-alert.error {
+  background-color: #f44336;
 }
 
-.alert-success {
-    background-color: #4CAF50;
-}
-
-/* Animación de aparición */
-.alert.show {
-    display: block;
-    opacity: 1;
-}
-
-.alert.hide {
-    opacity: 0;
-    display: none;
+.custom-alert.info {
+  background-color: #2196f3;
 }
 
 

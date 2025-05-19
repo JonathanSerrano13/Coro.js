@@ -10,8 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const descripcionInput = document.getElementById('Descripcion');
 
   if (!eventoId) {
-    alert('ID del evento no especificado');
-    window.location.href = 'Eventos.html';
+    showAlert('ID del evento no especificado', 'error');
+    setTimeout(() => {
+      window.location.href = 'Eventos.html';
+    }, 1500);
     return;
   }
 
@@ -33,8 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
       descripcionInput.value = evento.Descripcion || '';
     })
     .catch(() => {
-      alert('No se pudo cargar el evento');
-      window.location.href = 'Eventos.html';
+      showAlert('No se pudo cargar el evento', 'error');
+      setTimeout(() => {
+        window.location.href = 'Eventos.html';
+      }, 1500);
     });
 
   // Guardar cambios (submit del formulario)
@@ -61,11 +65,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return res.json();
     })
     .then(() => {
-      alert('Evento actualizado correctamente');
-      window.location.href = 'Eventos.html';
+      showAlert('Evento actualizado correctamente', 'success');
+      setTimeout(() => {
+        window.location.href = 'Eventos.html';
+      }, 1500);
     })
     .catch(() => {
-      alert('Error al actualizar evento');
+      showAlert('Error al actualizar evento', 'error');
     });
   });
 });
@@ -82,14 +88,30 @@ document.addEventListener('DOMContentLoaded', () => {
       // Redirige a listaCancionesAgregadas.html con el ID del evento como query parameter
       window.location.href = `listaCancionesAgregadas.html?id=${eventoId}`;
     } else {
-      alert('No se pudo obtener el ID del evento.');
+      showAlert('No se pudo obtener el ID del evento.', 'error');
     }
   });
 
   // Ejemplo de función para obtener el ID del evento
   function obtenerIdEvento() {
-    // Lógica para obtener el ID del evento (puede ser de la URL o datos locales)
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('id'); // Ajusta según cómo pases el ID
+    return urlParams.get('id');
   }
 });
+
+// Función showAlert para mensajes personalizados
+
+function showAlert(message, type = 'info') {
+  const existingAlert = document.querySelector('.custom-alert');
+  if (existingAlert) existingAlert.remove();
+
+  const alertDiv = document.createElement('div');
+  alertDiv.textContent = message;
+  alertDiv.className = `custom-alert ${type}`;
+
+  document.body.appendChild(alertDiv);
+
+  setTimeout(() => {
+    alertDiv.remove();
+  }, 3000);
+}

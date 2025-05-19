@@ -36,11 +36,24 @@
         <ul id="lista-eventos" class="lista">
 
             <!-- Aquí se cargarán los eventos -->
-             
+
         </ul>
     </div>
 
     <script src="../js/eventos.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cancionesSeleccionadasKey = 'listaCancionesSeleccionadas';
+
+            window.addEventListener('beforeunload', (event) => {
+                if (!document.referrer.includes('crearEvento.html')) {
+                    sessionStorage.removeItem(cancionesSeleccionadasKey);
+                }
+            });
+        });
+    </script>
+
 </body>
 
 </html>

@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const listaCanciones = document.getElementById('lista-canciones');
+    const listaCancionesAgregadas = document.getElementById('lista-canciones');
 
     // Obtener el ID del evento desde la URL
     const params = new URLSearchParams(window.location.search);
     const eventoId = params.get('id');
 
-    // Configuración al botón de agregar canciones
+    // Botón agregar canciones
     const btnAgregarCanciones = document.getElementById('btn-agregar-canciones');
     if (btnAgregarCanciones) {
         btnAgregarCanciones.addEventListener('click', () => {
@@ -16,11 +16,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (!eventoId) {
-        listaCanciones.innerHTML = '<li>Error: No se encontró el ID del evento.</li>';
+        listaCancionesAgregadas.innerHTML = '<li>Error: No se encontró el ID del evento.</li>';
         return;
     }
 
-    // Actualizar el botón de regreso
+    // Botón regresar
     const btnRegresar = document.getElementById('btn-regresar');
     if (btnRegresar) {
         btnRegresar.addEventListener('click', () => {
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Insertar HTML del modal en body
+    // Insertar HTML del modal letra/partitura y modal alertas
     const modalHtml = `
     <div id="modal-letra-partitura" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); justify-content:center; align-items:center;">
       <div class="modal-content" style="background:#fff; padding:20px; border-radius:8px; max-width:400px; width:90%; position:relative;">
@@ -38,35 +38,115 @@ document.addEventListener('DOMContentLoaded', async () => {
         <p><strong>Partitura:</strong> <a id="link-partitura" href="#" target="_blank" rel="noopener noreferrer">Ver partitura</a></p>
       </div>
     </div>
+
+    <div id="modal-alerta" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); justify-content:center; align-items:center;">
+      <div class="modal-content" style="background:#fff; padding:20px; border-radius:8px; max-width:320px; width:90%; position:relative; text-align:center;">
+        <p id="mensaje-alerta" style="margin-bottom:20px;"></p>
+        <button id="btn-confirmar" style="padding:8px 20px; margin-right:10px; border:none; background:#4caf50; color:#fff; border-radius:5px; cursor:pointer;">Si</button>
+        <button id="btn-cancelar" style="padding:8px 20px; border:none; background:#f44336; color:#fff; border-radius:5px; cursor:pointer;">No</button>
+      </div>
+    </div>
     `;
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 
+    // Variables modales
     const modal = document.getElementById('modal-letra-partitura');
     const modalNombre = document.getElementById('modal-cancion-nombre');
     const linkLetra = document.getElementById('link-letra');
     const linkPartitura = document.getElementById('link-partitura');
     const modalClose = document.getElementById('modal-close');
 
+    const modalAlerta = document.getElementById('modal-alerta');
+    const mensajeAlerta = document.getElementById('mensaje-alerta');
+    const btnConfirmar = document.getElementById('btn-confirmar');
+    const btnCancelar = document.getElementById('btn-cancelar');
+
+    // Cerrar modal letra/partitura
     modalClose.addEventListener('click', () => {
         modal.style.display = 'none';
     });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+        if (event.target === modalAlerta) {
+            modalAlerta.style.display = 'none';
+        }
+    });
+
+    // Función para mostrar modal alerta confirmación personalizada
+    function mostrarConfirmacion(mensaje) {
+        return new Promise((resolve) => {
+            mensajeAlerta.textContent = mensaje;
+            modalAlerta.style.display = 'flex';
+
+            function confirmar() {
+                modalAlerta.style.display = 'none';
+                cleanup();
+                resolve(true);
+            }
+
+            function cancelar() {
+                modalAlerta.style.display = 'none';
+                cleanup();
+                resolve(false);
+            }
+
+            function cleanup() {
+                btnConfirmar.removeEventListener('click', confirmar);
+                btnCancelar.removeEventListener('click', cancelar);
+            }
+
+            btnConfirmar.addEventListener('click', confirmar);
+            btnCancelar.addEventListener('click', cancelar);
+        });
+    }
+
+    // Mostrar modal letra/partitura
+    function mostrarModal(cancion) {
+        modalNombre.textContent = cancion.Nombre;
+
+        if (cancion.Letra) {
+            linkLetra.href = cancion.Letra;
+            linkLetra.textContent = 'Ver letra';
+            linkLetra.style.pointerEvents = 'auto';
+            linkLetra.style.color = '';
+        } else {
+            linkLetra.href = '#';
+            linkLetra.textContent = 'No disponible';
+            linkLetra.style.pointerEvents = 'none';
+            linkLetra.style.color = 'gray';
+        }
+
+        if (cancion.Partitura) {
+            linkPartitura.href = cancion.Partitura;
+            linkPartitura.textContent = 'Ver partitura';
+            linkPartitura.style.pointerEvents = 'auto';
+            linkPartitura.style.color = '';
+        } else {
+            linkPartitura.href = '#';
+            linkPartitura.textContent = 'No disponible';
+            linkPartitura.style.pointerEvents = 'none';
+            linkPartitura.style.color = 'gray';
+        }
+
+        modal.style.display = 'flex';
+    }
 
     // Cargar canciones del evento
     async function cargarCanciones() {
         try {
             const res = await fetch(`/api/eventos/${eventoId}/canciones`);
             const canciones = await res.json();
-            console.log(canciones);
 
-            // Limpiar la lista
-            listaCanciones.innerHTML = '';
+            listaCancionesAgregadas.innerHTML = '';
 
             if (canciones.length === 0) {
-                listaCanciones.innerHTML = '<li>No hay canciones asociadas a este evento.</li>';
+                listaCancionesAgregadas.innerHTML = '<li>No hay canciones asociadas a este evento.</li>';
                 return;
             }
 
-            // Renderizar canciones
             canciones.forEach(cancion => {
                 const li = document.createElement('li');
                 li.classList.add('item');
@@ -76,71 +156,71 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <label>${cancion.Nombre}</label>
                     </div>
                     <div class="acciones">
-                        <button class="btn-ver-letra-partitura">📄</button>
+                        <button class="btn-ver-letra-partitura"><i class="fi fi-rr-overview"></i></button>
                         <button class="btn-borrar"><i class="fi fi-rr-trash"></i></button>
                     </div>
                 `;
 
-                // Evento para borrar canción
-                li.querySelector('.btn-borrar').addEventListener('click', () => {
-                    if (confirm(`¿Eliminar canción "${cancion.Nombre}"?`)) {
-                        borrarRelacion(cancion.visualizacionID); // Usa el ID de la relación
+                // Evento para borrar canción con confirmación modal
+                li.querySelector('.btn-borrar').addEventListener('click', async () => {
+                    const confirmDelete = await mostrarConfirmacion(`¿Eliminar canción "${cancion.Nombre}"?`);
+                    if (confirmDelete) {
+                        borrarRelacion(cancion.visualizacionID);
                     }
                 });
 
-                // Evento para mostrar modal con links
+                // Evento para mostrar modal con letra/partitura
                 li.querySelector('.btn-ver-letra-partitura').addEventListener('click', () => {
-                    modalNombre.textContent = cancion.Nombre;
-
-                    if (cancion.Letra) {
-                        linkLetra.href = cancion.Letra;
-                        linkLetra.textContent = 'Ver letra';
-                        linkLetra.style.pointerEvents = 'auto';
-                        linkLetra.style.color = '';
-                    } else {
-                        linkLetra.href = '#';
-                        linkLetra.textContent = 'No disponible';
-                        linkLetra.style.pointerEvents = 'none';
-                        linkLetra.style.color = 'gray';
-                    }
-
-                    if (cancion.Partitura) {
-                        linkPartitura.href = cancion.Partitura;
-                        linkPartitura.textContent = 'Ver partitura';
-                        linkPartitura.style.pointerEvents = 'auto';
-                        linkPartitura.style.color = '';
-                    } else {
-                        linkPartitura.href = '#';
-                        linkPartitura.textContent = 'No disponible';
-                        linkPartitura.style.pointerEvents = 'none';
-                        linkPartitura.style.color = 'gray';
-                    }
-
-                    modal.style.display = 'flex';
+                    mostrarModal(cancion);
                 });
 
-                listaCanciones.appendChild(li);
+                listaCancionesAgregadas.appendChild(li);
             });
         } catch (error) {
             console.error('Error al cargar canciones:', error);
-            listaCanciones.innerHTML = '<li>Error al cargar canciones.</li>';
+            // Usar modal para mostrar error
+            mensajeAlerta.textContent = 'Error al cargar canciones.';
+            btnConfirmar.style.display = 'none';
+            btnCancelar.textContent = 'Cerrar';
+            modalAlerta.style.display = 'flex';
+
+            btnCancelar.onclick = () => {
+                modalAlerta.style.display = 'none';
+                btnConfirmar.style.display = 'inline-block';
+                btnCancelar.textContent = 'Cancelar';
+                btnCancelar.onclick = null;
+            };
         }
     }
 
-    // Borrar la relación específica en visualizacion
+    // Borrar relación en visualizacion
     async function borrarRelacion(visualizacionID) {
         try {
             const res = await fetch(`/api/visualizacion/${visualizacionID}`, { method: 'DELETE' });
             if (res.ok) {
-                cargarCanciones(); // Recargar la lista después de borrar
+                cargarCanciones();
             } else {
-                alert('Error al eliminar la relación.');
+                mostrarError('Error al eliminar la relación.');
             }
         } catch (error) {
-            alert('Error al eliminar la relación.');
+            mostrarError('Error al eliminar la relación.');
         }
     }
 
-    // Cargar canciones al inicio
+    // Mostrar error con modal alerta
+    function mostrarError(mensaje) {
+        mensajeAlerta.textContent = mensaje;
+        btnConfirmar.style.display = 'none';
+        btnCancelar.textContent = 'Cerrar';
+        modalAlerta.style.display = 'flex';
+
+        btnCancelar.onclick = () => {
+            modalAlerta.style.display = 'none';
+            btnConfirmar.style.display = 'inline-block';
+            btnCancelar.textContent = 'Cancelar';
+            btnCancelar.onclick = null;
+        };
+    }
+
     cargarCanciones();
 });

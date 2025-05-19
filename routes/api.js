@@ -2,31 +2,32 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 
+
+
 // Ruta para login
 router.post('/login', (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    if (!email || !password) {
-        return res.status(400).json({ message: 'Faltan datos' });
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Faltan datos' });
+  }
+
+  const query = 'SELECT * FROM integrante WHERE Email = ?';
+  db.query(query, [email], (err, results) => {
+    if (err) return res.status(500).json({ message: 'Error en base de datos' });
+
+    if (results.length === 0) {
+      return res.status(401).json({ message: 'Usuario no encontrado' });
     }
 
-    // Buscar usuario en tabla 'integrante' por Email
-    const query = 'SELECT * FROM integrante WHERE Email = ?';
-    db.query(query, [email], (err, results) => {
-        if (err) return res.status(500).json({ message: 'Error en base de datos' });
+    const user = results[0];
 
-        if (results.length === 0) {
-            return res.status(401).json({ message: 'Usuario no encontrado' });
-        }
-
-        const user = results[0];
-
-        if (password === user.Contraseña) {
-            return res.json({ message: 'Login exitoso', user: { id: user.ID, nombre: user.Nombre, rol: user.Rol } });
-        } else {
-            return res.status(401).json({ message: 'Contraseña incorrecta' });
-        }
-    });
+    if (password === user.Contraseña) {
+      return res.json({ message: 'Login exitoso', user: { id: user.ID, nombre: user.Nombre, rol: user.Rol } });
+    } else {
+      return res.status(401).json({ message: 'Contraseña incorrecta' });
+    }
+  });
 });
 
 //Ruta para registro
@@ -55,8 +56,6 @@ router.post('/registro', (req, res) => {
     });
   });
 });
-
-
 
 // Obtener lista de eventos (solo id y nombre)
 router.get('/eventos', (req, res) => {

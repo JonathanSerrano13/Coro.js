@@ -1,7 +1,7 @@
 body {
     font-family: 'Poppins', sans-serif;
     background: linear-gradient(135deg, #ffffff, #e8bea8, #b57a68);
-    background-attachment: fixed;
+    background-attachment:fixed ;
     display: flex;
     justify-content: center;
     min-height: 100vh;
@@ -61,10 +61,10 @@ textarea {
     border: none;
     padding: 10px 30px 10px 30px;
     border-radius: 10px;
-    cursor:pointer;
+    cursor: pointer;
 }
 
-.btnMapa button:hover{
+.btnMapa button:hover {
     background-color: rgba(255, 255, 255, 0.9);
 }
 
